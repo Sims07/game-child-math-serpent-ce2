@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Serpent des Nombres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top:#bfe9ff;
+    --sky-bottom:#eaf8ff;
+    --grass:#3fa66a;
+    --grass-dark:#2f8654;
+    --sun:#ffcf4d;
+    --sun-ring:#ffb63d;
+    --card:#ffffff;
+    --card-line:#dff0e6;
+    --ink:#233b34;
+    --ink-soft:#587268;
+    --snake-1:#67c26a;
+    --snake-2:#3f9f52;
+    --snake-eye:#20321f;
+    --tongue:#e0483a;
+    --correct:#2fae5a;
+    --correct-soft:#e4f8ea;
+    --wrong:#e35b4d;
+    --wrong-soft:#fdeceb;
+    --btn:#3fa66a;
+    --btn-ink:#ffffff;
+    --btn2:#ffcf4d;
+    --btn2-ink:#5a4200;
+    --focus:#2b6cb0;
+    --shadow: 0 10px 24px rgba(30,70,50,0.14);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --sky-top:#0b1730;
+      --sky-bottom:#152546;
+      --grass:#1f6b47;
+      --grass-dark:#164f34;
+      --sun:#f3e08a;
+      --sun-ring:#e0c766;
+      --card:#132038;
+      --card-line:#25385a;
+      --ink:#eef3f8;
+      --ink-soft:#a9bcd0;
+      --snake-1:#3f9f52;
+      --snake-2:#2a7b3c;
+      --snake-eye:#0c1710;
+      --tongue:#ff7b6b;
+      --correct:#4fd67f;
+      --correct-soft:#123a26;
+      --wrong:#ff8a7a;
+      --wrong-soft:#3a1a17;
+      --btn:#2f8654;
+      --btn-ink:#ffffff;
+      --btn2:#e0c766;
+      --btn2-ink:#3a2c00;
+      --focus:#7fb4ff;
+      --shadow: 0 10px 28px rgba(0,0,0,0.45);
+    }
+  }
+  :root[data-theme="dark"]{
+    --sky-top:#0b1730;
+    --sky-bottom:#152546;
+    --grass:#1f6b47;
+    --grass-dark:#164f34;
+    --sun:#f3e08a;
+    --sun-ring:#e0c766;
+    --card:#132038;
+    --card-line:#25385a;
+    --ink:#eef3f8;
+    --ink-soft:#a9bcd0;
+    --snake-1:#3f9f52;
+    --snake-2:#2a7b3c;
+    --snake-eye:#0c1710;
+    --tongue:#ff7b6b;
+    --correct:#4fd67f;
+    --correct-soft:#123a26;
+    --wrong:#ff8a7a;
+    --wrong-soft:#3a1a17;
+    --btn:#2f8654;
+    --btn-ink:#ffffff;
+    --btn2:#e0c766;
+    --btn2-ink:#3a2c00;
+    --focus:#7fb4ff;
+    --shadow: 0 10px 28px rgba(0,0,0,0.45);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 55%, var(--grass) 55%, var(--grass-dark) 100%);
+    font-family:'Nunito', system-ui, sans-serif;
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:28px 14px 40px;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  .sun{
+    position:absolute; top:26px; right:8%;
+    width:64px; height:64px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--sun), var(--sun-ring));
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--sun) 25%, transparent);
+  }
+  @media (max-width:520px){ .sun{ width:44px; height:44px; top:16px; right:6%; } }
+
+  .cloud{ position:absolute; opacity:.9; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.05)); }
+  .cloud svg{ display:block; }
+  .cloud.c1{ top:40px; left:6%; width:110px; }
+  .cloud.c2{ top:90px; left:60%; width:80px; opacity:.75; }
+  @media (max-width:520px){ .cloud.c1{ top:64px; } .cloud.c2{ display:none; } }
+
+  .wrap{
+    position:relative;
+    width:100%;
+    max-width:640px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+  }
+
+  header{ text-align:center; margin-top:4px; }
+  h1{
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:800;
+    font-size:clamp(28px, 6vw, 40px);
+    margin:0;
+    color:var(--ink);
+    line-height:1.1;
+  }
+  h1 .wiggle{ display:inline-block; animation:wiggle 2.6s ease-in-out infinite; }
+  @keyframes wiggle{
+    0%,100%{ transform:rotate(0deg); }
+    25%{ transform:rotate(-8deg); }
+    75%{ transform:rotate(8deg); }
+  }
+  .subtitle{
+    margin:6px 0 0;
+    font-size:15px;
+    color:var(--ink-soft);
+    font-weight:700;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-line);
+    border-radius:22px;
+    box-shadow:var(--shadow);
+    padding:18px 16px 20px;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+
+  .levels{
+    display:flex;
+    gap:8px;
+    background: color-mix(in srgb, var(--card-line) 55%, transparent);
+    padding:5px;
+    border-radius:999px;
+    width:100%;
+    max-width:420px;
+  }
+  .levels button{
+    flex:1;
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:9px 6px;
+    border-radius:999px;
+    cursor:pointer;
+    transition: background .18s ease, color .18s ease, transform .12s ease;
+  }
+  .levels button.active{
+    background:var(--btn);
+    color:var(--btn-ink);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+  .levels button:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+
+  .toprow{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:100%;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .range-pill{
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:700;
+    font-size:14px;
+    background: var(--correct-soft);
+    color: var(--correct);
+    padding:6px 14px;
+    border-radius:999px;
+  }
+  .progress{
+    font-weight:800;
+    font-size:14px;
+    color:var(--ink-soft);
+  }
+  .newgame{
+    border:none;
+    background:var(--btn2);
+    color:var(--btn2-ink);
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:9px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    transition: transform .12s ease;
+  }
+  .newgame:hover{ transform:translateY(-1px); }
+  .newgame:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+
+  .hint{
+    font-size:13px;
+    color:var(--ink-soft);
+    text-align:center;
+    line-height:1.45;
+    max-width:480px;
+  }
+
+  .grid-scroll{
+    width:100%;
+    overflow-x:auto;
+    padding-bottom:2px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap:5px;
+    width:100%;
+    min-width:340px;
+    max-width:460px;
+    margin:0 auto;
+  }
+  .cell{
+    aspect-ratio:1/1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:700;
+    font-size:clamp(13px, 3.6vw, 17px);
+    background: color-mix(in srgb, var(--card-line) 45%, transparent);
+    color: var(--ink);
+    position:relative;
+    user-select:none;
+  }
+
+  .cell.snake{
+    cursor:pointer;
+    background: linear-gradient(145deg, var(--snake-1), var(--snake-2));
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.18), 0 3px 6px rgba(0,0,0,0.12);
+    transition: transform .1s ease;
+  }
+  .cell.snake:hover{ transform: scale(1.05); }
+  .cell.snake:focus-visible{ outline:3px solid var(--focus); outline-offset:2px; }
+  .cell.snake .dot{
+    width:32%; height:32%;
+    border-radius:50%;
+    background: rgba(255,255,255,0.28);
+  }
+  .cell.snake.head::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:10px;
+    background:
+      radial-gradient(circle at 32% 34%, var(--snake-eye) 0 8%, transparent 9%),
+      radial-gradient(circle at 68% 34%, var(--snake-eye) 0 8%, transparent 9%);
+  }
+  .cell.snake.head::after{
+    content:"";
+    position:absolute;
+    bottom:6%; left:50%;
+    width:22%; height:10%;
+    background:var(--tongue);
+    clip-path: polygon(50% 100%, 20% 0, 40% 0, 50% 40%, 60% 0, 80% 0);
+    transform: translateX(-50%);
+  }
+
+  .cell.editing{
+    background:var(--card);
+    border:2px solid var(--btn);
+    padding:0;
+  }
+  .cell.editing input{
+    width:100%; height:100%;
+    border:none; background:transparent;
+    text-align:center;
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:700;
+    font-size:clamp(13px, 3.6vw, 17px);
+    color:var(--ink);
+    -moz-appearance:textfield;
+  }
+  .cell.editing input::-webkit-outer-spin-button,
+  .cell.editing input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .cell.editing input:focus{ outline:none; }
+
+  .cell.found{
+    background:var(--correct-soft);
+    color:var(--correct);
+    animation: pop .32s ease;
+  }
+  .cell.shake{ animation: shake .32s ease; background:var(--wrong-soft); }
+
+  @keyframes pop{
+    0%{ transform:scale(0.85); }
+    60%{ transform:scale(1.12); }
+    100%{ transform:scale(1); }
+  }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-4px); }
+    75%{ transform:translateX(4px); }
+  }
+
+  .legend{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    justify-content:center;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    font-weight:700;
+  }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .swatch{
+    width:14px; height:14px; border-radius:4px;
+    display:inline-block;
+  }
+  .swatch.snakec{ background:linear-gradient(145deg, var(--snake-1), var(--snake-2)); }
+  .swatch.foundc{ background:var(--correct-soft); border:2px solid var(--correct); }
+
+  .celebrate{
+    position:fixed; inset:0;
+    background:rgba(10,20,15,0.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+    padding:20px;
+  }
+  .celebrate.show{ display:flex; }
+  .celebrate .box{
+    background:var(--card);
+    border-radius:22px;
+    padding:28px 24px;
+    text-align:center;
+    max-width:340px;
+    box-shadow: var(--shadow);
+  }
+  .celebrate .emoji{ font-size:48px; }
+  .celebrate h2{
+    font-family:'Baloo 2', system-ui, sans-serif;
+    margin:8px 0 4px;
+    color:var(--ink);
+  }
+  .celebrate p{ color:var(--ink-soft); font-weight:700; margin:0 0 16px; font-size:14px; }
+  .celebrate button{
+    border:none;
+    background:var(--btn);
+    color:var(--btn-ink);
+    font-family:'Baloo 2', system-ui, sans-serif;
+    font-weight:700;
+    font-size:15px;
+    padding:11px 22px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+
+  .confetti{
+    position:absolute;
+    top:-10px;
+    font-size:18px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform: translateY(420px) rotate(360deg); opacity:0; }
+  }
+
+  footer{
+    color: color-mix(in srgb, var(--ink) 40%, transparent);
+    font-size:12px;
+    text-align:center;
+    margin-top:2px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="sun" aria-hidden="true"></div>
+  <div class="cloud c1" aria-hidden="true">
+    <svg viewBox="0 0 120 60" width="100%"><ellipse cx="30" cy="38" rx="28" ry="18" fill="#ffffff"/><ellipse cx="60" cy="28" rx="32" ry="22" fill="#ffffff"/><ellipse cx="90" cy="38" rx="24" ry="16" fill="#ffffff"/></svg>
+  </div>
+  <div class="cloud c2" aria-hidden="true">
+    <svg viewBox="0 0 120 60" width="100%"><ellipse cx="30" cy="38" rx="24" ry="15" fill="#ffffff"/><ellipse cx="60" cy="28" rx="28" ry="19" fill="#ffffff"/><ellipse cx="90" cy="38" rx="20" ry="13" fill="#ffffff"/></svg>
+  </div>
+
+  <div class="wrap">
+    <header>
+      <h1><span class="wiggle">🐍</span> Le Serpent des Nombres</h1>
+      <p class="subtitle">Trouve les nombres cachés sous le serpent !</p>
+    </header>
+
+    <div class="card">
+      <div class="levels" role="tablist" aria-label="Choisir le niveau">
+        <button id="lvl1" class="active" role="tab" aria-selected="true">Niveau 1 · 1 à 100</button>
+        <button id="lvl2" role="tab" aria-selected="false">Niveau 2 · 100 à 999</button>
+      </div>
+
+      <div class="toprow">
+        <span class="range-pill" id="rangePill">de 1 à 100</span>
+        <span class="progress" id="progress">0 / 9 trouvés</span>
+        <button class="newgame" id="newGameBtn">Nouveau serpent 🔄</button>
+      </div>
+
+      <p class="hint">Regarde les nombres juste à côté : celui d'avant, celui d'après, celui du dessus et celui du dessous t'aident à deviner ceux que le serpent cache !</p>
+
+      <div class="grid-scroll">
+        <div class="grid" id="grid" role="grid" aria-label="Tableau des nombres"></div>
+      </div>
+
+      <div class="legend">
+        <span><span class="swatch snakec"></span>caché par le serpent</span>
+        <span><span class="swatch foundc"></span>trouvé</span>
+      </div>
+    </div>
+
+    <footer>Astuce : à droite ou à gauche, le nombre change de 1. En dessous ou au-dessus, il change de 10.</footer>
+  </div>
+
+  <div class="celebrate" id="celebrate">
+    <div class="box">
+      <div class="emoji">🎉🐍🎉</div>
+      <h2>Bravo !</h2>
+      <p id="celebrateText">Tu as retrouvé tous les nombres cachés par le serpent !</p>
+      <button id="playAgainBtn">Rejouer</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const GRID_SIZE = 10;
+  let level = 1;
+  let base = 0;          // number offset for the current grid
+  let snakeCells = [];   // array of {r,c} in order (0 = head)
+  let foundSet = new Set(); // "r,c" keys already found
+  let total = 0;
+
+  const gridEl = document.getElementById('grid');
+  const rangePill = document.getElementById('rangePill');
+  const progressEl = document.getElementById('progress');
+  const lvl1Btn = document.getElementById('lvl1');
+  const lvl2Btn = document.getElementById('lvl2');
+  const newGameBtn = document.getElementById('newGameBtn');
+  const celebrate = document.getElementById('celebrate');
+  const celebrateText = document.getElementById('celebrateText');
+  const playAgainBtn = document.getElementById('playAgainBtn');
+
+  function cellValue(r, c){ return base + r * 10 + c + (level === 1 ? 1 : 0); }
+  function key(r,c){ return r + ',' + c; }
+
+  function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function generateSnake(length){
+    const maxAttempts = 300;
+    for(let attempt = 0; attempt < maxAttempts; attempt++){
+      const startR = randInt(0, GRID_SIZE - 1);
+      const startC = randInt(0, GRID_SIZE - 1);
+      const path = [{r:startR, c:startC}];
+      const visited = new Set([key(startR,startC)]);
+      let stuck = false;
+      while(path.length < length){
+        const cur = path[path.length - 1];
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        // shuffle
+        for(let i = dirs.length - 1; i > 0; i--){
+          const j = randInt(0, i);
+          [dirs[i], dirs[j]] = [dirs[j], dirs[i]];
+        }
+        let moved = false;
+        for(const [dr,dc] of dirs){
+          const nr = cur.r + dr, nc = cur.c + dc;
+          if(nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+          const k = key(nr,nc);
+          if(visited.has(k)) continue;
+          path.push({r:nr, c:nc});
+          visited.add(k);
+          moved = true;
+          break;
+        }
+        if(!moved){ stuck = true; break; }
+      }
+      if(!stuck && path.length === length) return path;
+    }
+    return null; // extremely unlikely
+  }
+
+  function startGame(){
+    celebrate.classList.remove('show');
+    foundSet = new Set();
+
+    if(level === 1){
+      base = 0;
+      rangePill.textContent = 'de 1 à 100';
+    } else {
+      base = randInt(1, 9) * 100;
+      rangePill.textContent = 'de ' + base + ' à ' + (base + 99);
+    }
+
+    const length = randInt(9, 10);
+    let path = generateSnake(length);
+    if(!path) path = generateSnake(9); // fallback, should not happen
+    snakeCells = path;
+    total = snakeCells.length;
+    progressEl.textContent = '0 / ' + total + ' trouvés';
+
+    renderGrid();
+  }
+
+  function renderGrid(){
+    gridEl.innerHTML = '';
+    const snakeMap = new Map();
+    snakeCells.forEach((cell, idx) => snakeMap.set(key(cell.r, cell.c), idx));
+
+    for(let r = 0; r < GRID_SIZE; r++){
+      for(let c = 0; c < GRID_SIZE; c++){
+        const div = document.createElement('div');
+        const k = key(r,c);
+        const value = cellValue(r,c);
+
+        if(snakeMap.has(k) && !foundSet.has(k)){
+          div.className = 'cell snake' + (snakeMap.get(k) === 0 ? ' head' : '');
+          div.setAttribute('role','button');
+          div.setAttribute('tabindex','0');
+          div.setAttribute('aria-label', 'Case cachée par le serpent');
+          div.innerHTML = '<span class="dot" aria-hidden="true"></span>';
+          div.dataset.r = r; div.dataset.c = c; div.dataset.value = value;
+          div.addEventListener('click', () => openInput(div, value));
+          div.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openInput(div, value); } });
+        } else if(snakeMap.has(k) && foundSet.has(k)){
+          div.className = 'cell found';
+          div.textContent = value;
+        } else {
+          div.className = 'cell';
+          div.textContent = value;
+        }
+        gridEl.appendChild(div);
+      }
+    }
+  }
+
+  function openInput(div, correctValue){
+    if(div.classList.contains('editing')) return;
+    div.classList.add('editing');
+    div.innerHTML = '';
+    const input = document.createElement('input');
+    input.type = 'tel';
+    input.inputMode = 'numeric';
+    input.pattern = '[0-9]*';
+    input.maxLength = 3;
+    div.appendChild(input);
+    input.focus();
+
+    function submit(){
+      const val = parseInt(input.value, 10);
+      if(val === correctValue){
+        foundSet.add(div.dataset.r + ',' + div.dataset.c);
+        div.classList.remove('editing');
+        div.classList.add('found');
+        div.textContent = correctValue;
+        progressEl.textContent = foundSet.size + ' / ' + total + ' trouvés';
+        if(foundSet.size === total){
+          setTimeout(showCelebration, 250);
+        }
+      } else if(!isNaN(val)){
+        div.classList.add('shake');
+        input.value = '';
+        setTimeout(() => div.classList.remove('shake'), 320);
+        input.focus();
+      }
+    }
+
+    input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ submit(); } });
+    input.addEventListener('blur', () => {
+      // if left empty/unsubmitted, revert to snake cell
+      if(div.classList.contains('editing')){
+        renderGrid();
+      }
+    });
+  }
+
+  function showCelebration(){
+    celebrateText.textContent = 'Tu as retrouvé les ' + total + ' nombres cachés par le serpent !';
+    celebrate.classList.add('show');
+    launchConfetti();
+  }
+
+  function launchConfetti(){
+    const emojis = ['🎉','⭐','🐍','✨','🌟'];
+    for(let i = 0; i < 18; i++){
+      const span = document.createElement('span');
+      span.className = 'confetti';
+      span.textContent = emojis[randInt(0, emojis.length - 1)];
+      span.style.left = randInt(2, 96) + '%';
+      span.style.animationDuration = (1.4 + Math.random() * 1.2) + 's';
+      span.style.animationDelay = (Math.random() * 0.4) + 's';
+      document.body.appendChild(span);
+      setTimeout(() => span.remove(), 3200);
+    }
+  }
+
+  lvl1Btn.addEventListener('click', () => {
+    if(level === 1) return;
+    level = 1;
+    lvl1Btn.classList.add('active'); lvl1Btn.setAttribute('aria-selected','true');
+    lvl2Btn.classList.remove('active'); lvl2Btn.setAttribute('aria-selected','false');
+    startGame();
+  });
+  lvl2Btn.addEventListener('click', () => {
+    if(level === 2) return;
+    level = 2;
+    lvl2Btn.classList.add('active'); lvl2Btn.setAttribute('aria-selected','true');
+    lvl1Btn.classList.remove('active'); lvl1Btn.setAttribute('aria-selected','false');
+    startGame();
+  });
+  newGameBtn.addEventListener('click', startGame);
+  playAgainBtn.addEventListener('click', startGame);
+
+  startGame();
+})();
+</script>
+</body>
+</html>
