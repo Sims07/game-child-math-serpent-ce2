@@ -573,39 +573,66 @@
 
   function openInput(div, correctValue){
     if(div.classList.contains('editing')) return;
+    const expectedLength = String(correctValue).length;
+    let done = false;
+
     div.classList.add('editing');
     div.innerHTML = '';
     const input = document.createElement('input');
     input.type = 'tel';
     input.inputMode = 'numeric';
     input.pattern = '[0-9]*';
-    input.maxLength = 3;
+    input.autocomplete = 'off';
+    input.maxLength = expectedLength;
     div.appendChild(input);
+    // iOS needs the focus call inside the same user gesture
     input.focus();
+    setTimeout(() => input.focus(), 0);
 
-    function submit(){
-      const val = parseInt(input.value, 10);
-      if(val === correctValue){
-        foundSet.add(div.dataset.r + ',' + div.dataset.c);
-        div.classList.remove('editing');
-        div.classList.add('found');
-        div.textContent = correctValue;
-        progressEl.textContent = foundSet.size + ' / ' + total + ' trouvés';
-        if(foundSet.size === total){
-          setTimeout(showCelebration, 250);
-        }
-      } else if(!isNaN(val)){
-        div.classList.add('shake');
-        input.value = '';
-        setTimeout(() => div.classList.remove('shake'), 320);
-        input.focus();
+    function succeed(){
+      done = true;
+      foundSet.add(div.dataset.r + ',' + div.dataset.c);
+      input.blur();
+      div.classList.remove('editing');
+      div.classList.add('found');
+      div.textContent = correctValue;
+      progressEl.textContent = foundSet.size + ' / ' + total + ' trouvés';
+      if(foundSet.size === total){
+        setTimeout(showCelebration, 250);
       }
     }
 
-    input.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ submit(); } });
+    function fail(){
+      div.classList.add('shake');
+      input.value = '';
+      setTimeout(() => div.classList.remove('shake'), 320);
+      input.focus();
+    }
+
+    function submit(){
+      if(done) return;
+      const raw = input.value.replace(/\D/g, '');
+      if(raw === '') return;
+      if(parseInt(raw, 10) === correctValue){ succeed(); } else { fail(); }
+    }
+
+    // Validation automatique dès que le nombre a la bonne longueur
+    input.addEventListener('input', () => {
+      const raw = input.value.replace(/\D/g, '');
+      if(raw !== input.value) input.value = raw;
+      if(raw.length >= expectedLength) submit();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){ e.preventDefault(); submit(); }
+    });
+
     input.addEventListener('blur', () => {
-      // if left empty/unsubmitted, revert to snake cell
-      if(div.classList.contains('editing')){
+      if(done) return;
+      if(input.value.replace(/\D/g, '') !== ''){
+        submit();
+        if(!done) renderGrid();
+      } else {
         renderGrid();
       }
     });
